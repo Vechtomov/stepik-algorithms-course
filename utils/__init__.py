@@ -1,1 +1,1 @@
-from .timed import timed as perf_test
+from .timed import timed_min, timed_avg

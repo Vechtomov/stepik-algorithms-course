@@ -31,21 +31,29 @@ def binary_search_max_condition(arr, l, r, condition):
         else: r = mid - 1
     return result
 
+def get_boundaries(begins, ends, item, b_l, b_r, e_l, e_r):
+    begin = binary_search_max_condition(begins, max(0, b_l), b_r, lambda x: x <= item)
+    end = binary_search_max_condition(ends, max(0, e_l), e_r, lambda x: x < item)
+    return begin, end, abs(begin - end)
+
+def count_segments(dots, l, r, begins, b_l, b_r, ends, e_l, e_r):
+    if(l > r): return
+    mid = l + (r-l)//2
+    item = dots[mid]
+    begin, end, result = get_boundaries(begins, ends, item[1], b_l, b_r, e_l, e_r)
+    item.append(result)
+    count_segments(dots, l, mid - 1, begins, b_l, begin, ends, e_l, end)
+    count_segments(dots, mid + 1, r, begins, begin, b_r, ends, end, e_r)
+
 def get_dots_belonging(segments, dots):
     l, r = 0, len(segments) - 1
     begins, ends = [], []
     for beg,end in segments: begins.append(beg); ends.append(end)
     quick_sort_eliminated(begins, l, r)
     quick_sort_eliminated(ends, l, r)
-    result = []
-    first_begin = first_end = 0
-    dots_sorted = sorted([(i,dots[i]) for i in range(len(dots))], key=itemgetter(1))
-    for d in dots_sorted:
-        first_begin = binary_search_max_condition(begins, max(0, first_begin), r, lambda x: x <= d[1])
-        first_end = binary_search_max_condition(ends, max(0, first_end), r, lambda x: x < d[1])
-        result_count = abs(first_begin - first_end)
-        result.append((d[0], result_count))
-    return list(map(itemgetter(1), sorted(result, key=itemgetter(0))))
+    dots_sorted = sorted([[i,dots[i]] for i in range(len(dots))], key=itemgetter(1))
+    count_segments(dots_sorted, 0, len(dots) - 1, begins, l, r, ends, l, r)
+    return list(map(itemgetter(2), sorted(dots_sorted, key=itemgetter(0))))
 
 def ass(actual, expected):
     try:
@@ -57,13 +65,13 @@ def ass(actual, expected):
 def test():
     implementation = get_dots_belonging
     ass(implementation([[0,5],[7,10]], [1]), [1])
-    ass(implementation([[1,3],[2,4]], [0,1,2,3,4,5]), [0,1,2,2,1,0])
     ass(implementation([[1,5],[2,6],[3,4],[0,7]], list(reversed([0,1,2,3,4,5,6,7,8]))), [0,1,2,3,4,4,3,2,1])
+    ass(implementation([[1,3],[2,4]], [0,1,2,3,4,5]), [0,1,2,2,1,0])
     ass(implementation([[0,2],[8,10]],[1,3,5,8]), [1,0,0,1])
     print('all tests succeded')
 
 def performance():
-    from utils import perf_test
+    from utils import timed_avg 
     import random
 
     n = 50000
@@ -74,7 +82,7 @@ def performance():
     segments = gen_segments()
     dots = list(range(n))
     random.shuffle(dots)
-    print(perf_test(get_dots_belonging, segments, dots, n_iter=5))
+    print(timed_avg(get_dots_belonging, segments, dots, n_iter=5))
     
 def test_quick_sort():
     sort = quick_sort_eliminated
@@ -88,7 +96,7 @@ def main():
     def read_arr(s):
         return list(map(int, (s.split())))
     reader = (s for s in sys.stdin)
-    n, m = read_arr(next(reader))
+    n, _ = read_arr(next(reader))
     segments = [read_arr(next(reader)) for _ in range(n)] 
     dots = read_arr(next(reader))
     print(' '.join([str(i) for i in get_dots_belonging(segments, dots)]))
