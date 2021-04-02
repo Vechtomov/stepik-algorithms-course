@@ -23,25 +23,29 @@ def quick_sort_eliminated(arr, l, r):
             quick_sort_eliminated(arr, bound + 1, r)
             r = bound - 1
 
-def binary_search_max_condition(arr, l, r, condition):
+def binary_search_max_le(arr, l, r, item):
     result = -1
     while l<=r:
         mid = l + (r-l)//2
-        if(condition(arr[mid])): l, result = mid + 1, mid
+        if(arr[mid] <= item): l, result = mid + 1, mid
         else: r = mid - 1
     return result
-
-def get_boundaries(begins, ends, item, b_l, b_r, e_l, e_r):
-    begin = binary_search_max_condition(begins, max(0, b_l), b_r, lambda x: x <= item)
-    end = binary_search_max_condition(ends, max(0, e_l), e_r, lambda x: x < item)
-    return begin, end, abs(begin - end)
+    
+def binary_search_max_lt(arr, l, r, item):
+    result = -1
+    while l<=r:
+        mid = l + (r-l)//2
+        if(arr[mid] < item): l, result = mid + 1, mid
+        else: r = mid - 1
+    return result
 
 def count_segments(dots, l, r, begins, b_l, b_r, ends, e_l, e_r):
     if(l > r): return
     mid = l + (r-l)//2
     item = dots[mid]
-    begin, end, result = get_boundaries(begins, ends, item[1], b_l, b_r, e_l, e_r)
-    item.append(result)
+    begin = binary_search_max_le(begins, max(0, b_l), b_r, item[1])
+    end = binary_search_max_lt(ends, max(0, e_l), e_r, item[1])
+    item.append(abs(begin - end))
     count_segments(dots, l, mid - 1, begins, b_l, begin, ends, e_l, end)
     count_segments(dots, mid + 1, r, begins, begin, b_r, ends, end, e_r)
 
@@ -71,18 +75,22 @@ def test():
     print('all tests succeded')
 
 def performance():
-    from utils import timed_avg 
+    from utils import timed_min
     import random
 
     n = 50000
     def gen_segments():
-        result = [[i,i+random.randint(i, i+n)] for i in range(n)]
-        random.shuffle(result)
-        return result
+        segments = []
+        for _ in range(n):
+            beg = random.randint(0, 10**8) 
+            end = random.randint(beg, 10**8) 
+            segments.append([beg, end])
+        random.shuffle(segments)
+        return segments
     segments = gen_segments()
-    dots = list(range(n))
+    dots = [random.randint(0 , 10**8) for _ in range(n)]
     random.shuffle(dots)
-    print(timed_avg(get_dots_belonging, segments, dots, n_iter=5))
+    print(timed_min(get_dots_belonging, segments, dots, n_iter=5))
     
 def test_quick_sort():
     sort = quick_sort_eliminated
