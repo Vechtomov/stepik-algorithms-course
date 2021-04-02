@@ -1,5 +1,6 @@
 import sys
 import random
+from operator import itemgetter
 
 def quick_sort_eliminated(arr, l, r):
     while l < r:
@@ -38,13 +39,13 @@ def get_dots_belonging(segments, dots):
     quick_sort_eliminated(ends, l, r)
     result = []
     first_begin = first_end = 0
-    dots_sorted = sorted([(i,dots[i]) for i in range(len(dots))], key=lambda x: x[1])
+    dots_sorted = sorted([(i,dots[i]) for i in range(len(dots))], key=itemgetter(1))
     for d in dots_sorted:
         first_begin = binary_search_max_condition(begins, max(0, first_begin), r, lambda x: x <= d[1])
         first_end = binary_search_max_condition(ends, max(0, first_end), r, lambda x: x < d[1])
         result_count = abs(first_begin - first_end)
         result.append((d[0], result_count))
-    return [x[1] for x in sorted(result, key=lambda x: x[0])]
+    return list(map(itemgetter(1), sorted(result, key=itemgetter(0))))
 
 def ass(actual, expected):
     try:
@@ -94,7 +95,6 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    import sys
     mode = sys.argv[1] if len(sys.argv) else None
     if(mode == 'performance'): performance()
     elif(mode == 'test'): test()
