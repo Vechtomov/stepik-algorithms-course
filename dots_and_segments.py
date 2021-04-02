@@ -74,31 +74,31 @@ def test():
     ass(implementation([[0,2],[8,10]],[1,3,5,8]), [1,0,0,1])
     print('all tests succeded')
 
+def generate_test_data_random():
+    import random
+    n = 50000
+    max_number = 10000
+    segments = []
+    for _ in range(n):
+        beg = random.randint(0, max_number) 
+        end = random.randint(beg, max_number) 
+        segments.append([beg, end])
+    random.shuffle(segments)
+    dots = [random.randint(0 , max_number) for _ in range(n)]
+    random.shuffle(dots)
+    return segments, dots
+
 def performance():
     from utils import timed_min
-    import random
-
-    n = 50000
-    def gen_segments():
-        segments = []
-        for _ in range(n):
-            beg = random.randint(0, 10**8) 
-            end = random.randint(beg, 10**8) 
-            segments.append([beg, end])
-        random.shuffle(segments)
-        return segments
-    segments = gen_segments()
-    dots = [random.randint(0 , 10**8) for _ in range(n)]
-    random.shuffle(dots)
-    print(timed_min(get_dots_belonging, segments, dots, n_iter=5))
+    data = generate_test_data_random()
+    generate_test_file(*data)
+    print(timed_min(get_dots_belonging, *data, n_iter=5))
     
-def test_quick_sort():
-    sort = quick_sort_eliminated
-    assert sort([1], 0, 0) == [1]
-    assert sort([2,1], 0, 1) == [1,2]
-    assert sort([2,1,3], 0, 2) == [1,2,3]
-    assert sort([3,2,1,4], 0, 3) == [1,2,3,4]
-    assert sort([3,2,1,1], 0, 3) == [1,1,2,3]
+def generate_test_file(segments, dots):
+    with open('dots_and_segments_test.txt','w') as file:
+        file.writelines([f'{len(segments)} {len(dots)}\n'] + \
+            [f'{beg} {end}\n' for beg,end in segments] + \
+            [' '.join(map(str, dots))])
 
 def main():
     def read_arr(s):
@@ -107,11 +107,17 @@ def main():
     n, _ = read_arr(next(reader))
     segments = [read_arr(next(reader)) for _ in range(n)] 
     dots = read_arr(next(reader))
-    print(' '.join([str(i) for i in get_dots_belonging(segments, dots)]))
+    # print(' '.join([str(i) for i in get_dots_belonging(segments, dots)]))
+    counter = 0
+    for i in get_dots_belonging(segments, dots): counter += i
+    print(counter)
 
 if __name__ == "__main__":
     # main()
-    mode = sys.argv[1] if len(sys.argv) else None
+    mode = sys.argv[1] if len(sys.argv) > 1 else None
     if(mode == 'performance'): performance()
     elif(mode == 'test'): test()
-    else: main()
+    elif(mode == 'gen_test_file'): generate_test_file(*generate_test_data_random())
+    else: 
+        from utils import timed_min
+        print(timed_min(main, n_iter=1))
