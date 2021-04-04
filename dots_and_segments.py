@@ -17,7 +17,7 @@ def quick_sort_3(arr, l, r):
             eq_bound += 1
             if(lt_bound == eq_bound): arr[lt_bound], arr[i] = arr[i], arr[lt_bound]
             else: arr[lt_bound], arr[i], arr[eq_bound] = arr[i], arr[eq_bound], arr[lt_bound]
-        if(arr[i] == x and eq_bound < r):
+        elif(arr[i] == x and eq_bound < r):
             eq_bound += 1
             arr[i], arr[eq_bound] = arr[eq_bound], arr[i]
     arr[l], arr[lt_bound] = arr[lt_bound], arr[l]
@@ -70,11 +70,14 @@ def ass(actual, expected):
 
 def test():
     implementation = get_dots_belonging
+    ass(implementation(\
+        [[10, 10],[3, 9],[4, 5],[3, 6],[1, 8],[2, 2],[7, 10],[7, 8],[10, 10],[0, 9]],\
+        [3,2,0,10,1,8,1,9,6,2]),\
+            [4,3,1,3,2,5,2,3,4,3])
     ass(implementation([[0,5],[7,10]], [1]), [1])
     ass(implementation([[1,5],[2,6],[3,4],[0,7]], list(reversed([0,1,2,3,4,5,6,7,8]))), [0,1,2,3,4,4,3,2,1])
     ass(implementation([[1,3],[2,4]], [0,1,2,3,4,5]), [0,1,2,2,1,0])
     ass(implementation([[0,2],[8,10]],[1,3,5,8]), [1,0,0,1])
-    ass(implementation([[0,1],[0,1]],[0,1,2]), [1,1,0]) # todo как разбирать такое случай
     print('all tests succeded')
 
 def generate_test_data_random():
@@ -113,6 +116,7 @@ def test_quick_sort():
     ass(sort([3,2,1,1], 0, 3),[1,1,2,3])
     ass(sort([3,2,1,3,1], 0, 4),[1,1,2,3,3])
     ass(sort([3,2,1,2,3,1], 0, 5),[1,1,2,2,3,3])
+    print('all tests succeeded')
 
 def main():
     def read_arr(s):
@@ -121,9 +125,10 @@ def main():
     n, _ = read_arr(next(reader))
     segments = [read_arr(next(reader)) for _ in range(n)] 
     dots = read_arr(next(reader))
-    # print(' '.join([str(i) for i in get_dots_belonging(segments, dots)]))
+    result = get_dots_belonging(segments, dots)
+    print(' '.join([str(i) for i in result]))
     counter = 0
-    for i in get_dots_belonging(segments, dots): counter += i
+    for i in result: counter += i
     print(counter)
 
 if __name__ == "__main__":
@@ -131,6 +136,7 @@ if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else None
     if(mode == 'performance'): performance()
     elif(mode == 'test'): test()
+    elif(mode == 'test_sort'): test_quick_sort()
     elif(mode == 'gen_test_file'): generate_test_file(*generate_test_data_random())
     else: 
         from utils import timed_min
