@@ -61,14 +61,8 @@ def get_dots_belonging(segments, dots):
     count_segments(dots_sorted, 0, len(dots) - 1, begins, l, r, ends, l, r)
     return list(map(itemgetter(2), sorted(dots_sorted, key=itemgetter(0))))
 
-def ass(actual, expected):
-    try:
-        assert actual == expected
-    except:
-        print(actual, expected)
-        raise
-
 def test():
+    from utils import are_equal as ass
     implementation = get_dots_belonging
     ass(implementation(\
         [[10, 10],[3, 9],[4, 5],[3, 6],[1, 8],[2, 2],[7, 10],[7, 8],[10, 10],[0, 9]],\
@@ -107,6 +101,7 @@ def generate_test_file(segments, dots):
             [' '.join(map(str, dots))])
 
 def test_quick_sort():
+    from utils import are_equal as ass
     sort = quick_sort_3
     ass(sort([1], 0, 0),[1])
     ass(sort([2,1], 0, 1),[1,2])
