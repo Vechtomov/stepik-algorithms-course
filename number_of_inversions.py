@@ -58,14 +58,14 @@ def merge_sort(arr):
     return res, inv1 + inv2 + inv
 
 def test():
-    from utils import timed
+    from utils import timed_min
     # assert merge_sort([2, 3, 9, 2, 9])[1] == 2
     # assert merge_sort([4, 3, 2, 1])[1] == 6
     # assert merge_sort([4, 3, 2, 5, 1])[1] == 7
     # assert merge_sort([1])[1] == 0
     # assert merge_sort([1, 2, 3])[1] == 0
     arr = list(reversed(range(100000)))
-    print(timed(merge_sort, arr))
+    print(timed_min(merge_sort, arr))
 
 def main():
     def read_arr(s):
