@@ -1,22 +1,18 @@
 def brackets(s):
-    st = []
-    begins_numbers = []
-    ends = {'}':'{', ')':'(', ']':'['}
-    begins = ['(','{','[']
-    for i in range(len(s)):
-        ch = s[i]
-        if ch in ends: 
-            if len(st) == 0 or st.pop() != ends[ch]: 
+    opened = []
+    closing_brackets = {'}': '{', ')': '(', ']': '['}
+    opening_brackets = ['(', '{', '[']
+    for i, ch in enumerate(s):
+        if ch in closing_brackets: 
+            if len(opened) == 0 or opened.pop()[0] != closing_brackets[ch]: 
                 return i
-            begins_numbers.pop()
-        elif ch in begins: 
-            st.append(ch)
-            begins_numbers.append(i)
-    return -1 if len(st) == 0 else begins_numbers[-1]
+        elif ch in opening_brackets: 
+            opened.append((ch, i))
+    return -1 if len(opened) == 0 else opened.pop()[1]
 
 def main():
     result = brackets(input())
-    print("Success" if result < 0 else result)
+    print("Success" if result < 0 else result + 1)
 
 def test():
     from utils import are_equal
