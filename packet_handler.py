@@ -7,29 +7,31 @@ def task(size, packets):
     packets = [(p[0], p[1], i) for i, p in enumerate(packets)]
     # print(packets)
     buffer = queue.Queue(size)
-    next_packet_ind = 1
+    next_packet_ind = 0
     result = [-1] * n
-    current_packet = packets[0]
-    buffer.put(current_packet)
-    current_time = current_packet[0]
-    # сначала считываем все одновременные пакеты, отбрасываем те, что не влезли в буфер
+    current_time = 0
+    # сначала считываем все пакеты, пока не заполнится буфер или есть пакеты с текущим временем 
     # обрабатываем 1 пакет в буфере, увеличиваем текущее время, записываем в результат
     # считываем новый пакет; если его время меньше текущего, отбрасываем его, иначе добавляем в конец буфера
     while next_packet_ind < n or not buffer.empty():
         if next_packet_ind < n:
             new_packet = packets[next_packet_ind]
-            if new_packet[0] <= current_time:
-                if new_packet[0] == current_time and not buffer.full():
+            if not buffer.full() and current_time <= new_packet[0]:
+                if buffer.empty():
+                    current_time = new_packet[0]
+                if buffer.empty() and new_packet[1] == 0:
+                    result[new_packet[2]] = current_time
+                else:
                     buffer.put_nowait(new_packet)
                 next_packet_ind += 1
                 continue
-            elif buffer.empty():
-                buffer.put_nowait(new_packet)
-                current_time = new_packet[0]
+            elif current_time >= new_packet[0]:
                 next_packet_ind += 1
                 continue
         if not buffer.empty():
             current_packet = buffer.get_nowait()
+            if current_time < current_packet[0]:
+                current_time = current_packet[0]
             result[current_packet[2]] = current_time
             current_time += current_packet[1]
     return result
@@ -51,22 +53,28 @@ def test():
     from utils import are_equal
     method = task
 
-    def simple_tests():
-        are_equal(method(1, []), [])
-        are_equal(method(1, [(0, 0)]), [0])
-        are_equal(method(1, [(1, 0)]), [1])
-        are_equal(method(1, [(1, 1)]), [1])
-        are_equal(method(2, [(0, 1),(0, 1)]), [0, 1])
-        are_equal(method(1, [(0, 1),(0, 1)]), [0, -1])
-        are_equal(method(2, [(0, 0),(0, 1)]), [0, 0])
-        are_equal(method(2, [(0, 1),(2, 1)]), [0, 2])
-        are_equal(method(2, [(0, 1),(1, 1)]), [0, 1])
-        are_equal(method(2, [(0, 2),(1, 1)]), [0, -1])
-        are_equal(method(2, [(0, 2),(4, 1),(4, 1)]), [0, 4, 5])
-        are_equal(method(1, [(0, 2),(4, 2),(5, 1)]), [0, 4, -1])
-        are_equal(method(1, [(0, 2),(4, 2),(6, 1)]), [0, 4, 6])
-        
-    simple_tests()
+    def new_tests():
+        are_equal(method(2, [(1,1),(1,1)]), [1,2])
+        are_equal(method(2, [(1,1),(3,1)]), [1,3])
+        are_equal(method(2, [(1,1),(1,1),(1,1)]), [1,2,-1])
+        are_equal(method(2, [(1,1),(1,1),(2,1)]), [1,2,3])
+        are_equal(method(2, [(1,0),(1,0),(2,0)]), [1,1,2])
+        are_equal(method(2, [(1,0),(1,0),(1,0)]), [1,1,1])
+        are_equal(method(2, [(1,0),(1,0),(1,0),(2,0)]), [1,1,1,2])
+        are_equal(method(2, [(1,2),(1,1),(2,1)]), [1,3,-1])
+        are_equal(method(2, [(1,2),(1,1),(3,1)]), [1,3,4])
+        are_equal(method(2, [(1,2),(1,2),(3,1)]), [1,3,5])
+        are_equal(method(2, [(1,2),(1,2),(3,1),(3,1)]), [1,3,5,-1])
+        are_equal(method(2, [(1,2),(1,2),(2,1),(3,1)]), [1,3,-1,5])
+        are_equal(method(2, [(1,2),(1,2),(2,1),(2,1),(3,1)]), [1,3,-1,-1,5])
+        are_equal(method(2, [(1,2),(1,2),(2,1),(2,1),(3,1),(3,1)]), [1,3,-1,-1,5,-1])
+        are_equal(method(2, [(1,2),(1,2),(2,1),(2,1),(3,1),(4,1)]), [1,3,-1,-1,5,-1])
+        are_equal(method(2, [(1,2),(1,2),(2,1),(2,1),(3,1),(5,1)]), [1,3,-1,-1,5,6])
+        are_equal(method(3, [(1,2),(1,2),(2,2),(2,1),(3,1),(5,1)]), [1,3,5,-1,7,8])
+        are_equal(method(2, [(0,0),(0,0),(0,0),(1,0),(1,0),(1,1),(1,2),(1,3)]), [0,0,0,1,1,1,2,-1])
+        are_equal(method(2, [(0,0),(0,0),(0,0),(1,1),(1,0),(1,0),(1,2),(1,3)]), [0,0,0,1,2,-1,-1,-1])
+
+    new_tests()
 
     print('all tests succeeded')
 
