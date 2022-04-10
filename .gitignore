@@ -1,10 +1,3 @@
 __pycache__
 .vscode
-dots_and_segments_test.txt
-LDS_test.txt
-knapsack_test.txt
-statements.pdf
-tree_height_test.txt
-packet_handler_test.txt
-stack_with_max_test.txt
-max_in_sliding_window_test.txt
+**/*_test.txt
